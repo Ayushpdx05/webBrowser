@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>My Browser by Ayush Singh</title>
+  </head>
+  <!-- This is the left side of the page with images -->
+  <div>
+
+  </div>
+  <!-- This will be the right side with explanation of the images of code -->
+  <div>
+    <h2>The Journey of a Simple Browser (side by side at the bottom of the page :) )</h2>
+    <p>
+        <strong>Once upon a time</strong>, in a lecture hall, my professor posed a question: <em>"What happens when you type a URL into your browser?"</em>
+        At that moment, I realized I had no idea.......Only later did I realize how complex and abstracted modern day browsers really are.
+    </p>
+    
+    <h3>Building a Browser to Find Out</h3>
+    <p>
+        I set out to create a basic browser from scratch, with only one goal in mind: to understand the steps a modern browser takes to fetch and display a webpage. 
+    </p>
+    
+    <h3>Typing the URL: DNS Lookup</h3>
+    <p>
+        When we type a URL like <code>www.example.com</code>, our browser first needs to locate the "address" of the site. In the background, my browser sends out a call to find the site's IP address. 
+        This is the <strong>DNS Lookup</strong> step, where the hostname (like <code>example.com</code>) gets translated into an IP address (like <code>93.184.216.34</code>) so that our computer knows where to send the request.In the code below the DNS
+        lookup is done implictly before we even connect in the line s.connect((self.host, self.port)). 
+        <pre><code>
+                                                def request(self):
+                                                    s = socket.socket(
+                                                            family=socket.AF_INET,
+                                                            type=socket.SOCK_STREAM,
+                                                            proto=socket.IPPROTO_TCP,
+                                                    )
+                                                    s.connect((self.host, self.port))
+                                                    request = "GET {} HTTP/1.0\r\n".format(self.path)
+                                                    request += "Host: {}\r\n".format(self.host)
+                                                    request += "\r\n"
+                                                    s.send(request.encode('utf-8'))
+                                                    response = s.makefile('r', encoding='utf-8', newline='\r\n')
+                                                    statusline = response.readline()
+                                                    version, status, explanation = statusline.split(' ', 2)
+                                                    response_headers = {}
+                                                    while True:
+                                                        line = response.readline()
+                                                        if line == '\r\n':
+                                                            break
+                                                        header, value = line.split(':', 1)
+                                                        response_headers[header.lower()] = value.strip()
+                                                    assert "transfer-encoding" not in response_headers
+                                                    assert "content-encoding" not in response_headers
+                                                    content = response.read()
+                                                    s.close()
+                                                    return content
+            </code></pre>            
+    </p>
+    
+    <h3>Connecting to the Server: TCP Handshake</h3>
+    <p>
+        Now that we know where to go, my browser starts reaching out to the server. It establishes a <strong>TCP handshake</strong>—
+        The three-way handshake (SYN, SYN-ACK, ACK) means both my browser and the server agree to "talk" and send data back and forth. This makes the connection reliable, so the data isn’t lost or jumbled in transit. request = "GET {} HTTP/1.0\r\n".format(self.path) and s.send(request.encode('utf-8')) create and send the HTTP request itself. It’s not part of DNS resolution or TCP connection but is the actual HTTP GET request sent over the established TCP connection.
+        s.makefile('r', encoding='utf-8', newline='\r\n') wrap the socket in a file-like object to read the server’s response, making it easier to process.
+    </p>
+    
+    <h3>Requesting the Page: HTTP Request</h3>
+    <p>
+        With the connection established, my browser sends an <strong>HTTP GET request</strong> to ask the server for the content of the page. This is like saying, <em>"Please give me the information for <code>example.com</code>!"</em>
+    </p>
+    
+    <h3>Receiving and Displaying Content</h3>
+    <p>
+        The server responds with the requested page’s HTML content, which my browser then receives, processes, and displays. Although my browser doesn’t support styling or JavaScript, it accomplishes the core task:
+        fetching and displaying the raw content from a server.
+    </p>
+    
+    <h3>Reflections</h3>
+    <p>
+        Although modern browsers handle countless additional tasks, creating this simple version helped me understand the essentials: <strong>DNS lookup, TCP handshake, HTTP request, and response display</strong>. 
+        Every URL entry in a browser is a journey, from converting the hostname to connecting, requesting, and finally displaying the content. Below is a side by side comparision, now is it exactly the same? No. But 
+        id like to say I came out a better programmer.
+    </p>
+    <img src="./webbrowser.PNG"  width="1000" height="500">
+  </div>
+</html>
